@@ -1,12 +1,12 @@
 from fastapi.testclient import TestClient
 from main import app
-import pytest
 
 client = TestClient(app)
 
 
 def test_predict_returns_200_and_valid_value():
-    """Verifica que el endpoint responda 200 y devuelva una predicción numérica."""
+    """Verifica que el endpoint responda 200 y
+    devuelva una predicción numérica."""
     response = client.post(
         "/predict", json={"values": [10.0, 12.5, 13.2, 14.8, 15.0]})
     assert response.status_code == 200
@@ -16,7 +16,8 @@ def test_predict_returns_200_and_valid_value():
 
 
 def test_predict_increases_with_positive_trend():
-    """Comprueba que con una tendencia ascendente la predicción sea mayor que el último valor."""
+    """Comprueba que con una tendencia ascendente la predicción
+    sea mayor que el último valor."""
     values = [1, 2, 3, 4, 5, 6]
     response = client.post("/predict", json={"values": values})
     result = response.json()
