@@ -35,8 +35,7 @@ jobs:
 
             - name: Run tests
               run: |
-                  cd services/${{ matrix.service }}
-                  pytest -q --disable-warnings --maxfail=1
+                  pytest services/${{ matrix.service }}/tests -v
 
     build-docker:
         runs-on: ubuntu-latest
