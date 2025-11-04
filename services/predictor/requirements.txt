@@ -3,3 +3,5 @@ uvicorn
 pandas
 numpy
 prophet
+pytest
+httpx
