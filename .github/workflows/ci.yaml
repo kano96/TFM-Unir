@@ -11,7 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                service: [detector, predictor, rca]
+                service: [detector, predictor, rca, simulator]
 
         steps:
             - name: Checkout code
@@ -34,6 +34,8 @@ jobs:
                   flake8 .
 
             - name: Run tests
+              env:
+                  PYTHONPATH: services/${{ matrix.service }}
               run: |
                   pytest services/${{ matrix.service }}/tests -v
 
