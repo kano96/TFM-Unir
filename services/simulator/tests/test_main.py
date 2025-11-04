@@ -5,7 +5,7 @@ client = TestClient(app)
 
 
 def test_simulate_request_ok_or_error():
-    """Debe responder correctamente con estado ok o 
+    """Debe responder correctamente con estado ok o
     error y contener latencia"""
     response = client.get("/simulate")
     assert response.status_code == 200

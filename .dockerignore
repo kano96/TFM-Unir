@@ -1,0 +1,27 @@
+# Archivos y carpetas de entorno local
+.vscode
+.pytest_cache
+__pycache__
+.env
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Repositorios y control de versiones
+.git
+.gitignore
+
+# Archivos de CI/CD que no se usan dentro del contenedor
+.github
+
+# Configuración local de IDEs
+.idea
+
+# Documentación o notas locales
+*.md
