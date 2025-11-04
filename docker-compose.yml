@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  simulator:
+    build:
+      context: ./services/simulator
+    container_name: simulator
+    ports:
+      - "8080:8080"
+    networks:
+      - aiops-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - aiops-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - aiops-net
+
+  detector:
+    build:
+      context: ./services/detector
+    ports:
+      - "8000:8000"
+    networks:
+      - aiops-net
+
+  predictor:
+    build:
+      context: ./services/predictor
+    ports:
+      - "8001:8001"
+    networks:
+      - aiops-net
+
+  rca:
+    build:
+      context: ./services/rca
+    ports:
+      - "8002:8002"
+    networks:
+      - aiops-net
+
+networks:
+  aiops-net:
+    driver: bridge
