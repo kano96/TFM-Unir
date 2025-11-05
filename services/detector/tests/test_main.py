@@ -31,7 +31,11 @@ def test_detect_identifies_extreme_values_as_anomalies():
     assert extreme_response.status_code == 200
     # Esperamos que al menos los valores extremos sean más "anómalos"
     assert extreme_result["is_anomaly"] in [True, False]  # tipo correcto
-    assert extreme_result["score"] <= normal_score or extreme_result["is_anomaly"] is True
+    is_more_anomalous = (
+        extreme_result["score"] <= normal_score
+        or extreme_result["is_anomaly"] is True
+    )
+    assert is_more_anomalous
 
 
 def test_detect_with_empty_input_should_fail():
