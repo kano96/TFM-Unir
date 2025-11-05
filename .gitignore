@@ -1,2 +1,29 @@
-/.vscode
-/.pytest_cache
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Docker artifacts
+*.log
+*.pid
+*.db
+*.sqlite3
+
+# Byte-compiled
+*.pyo
+*.pyd
+
+# pytest cache
+.pytest_cache/
+.cache/
+
+# VSCode
+.vscode/
+
+# Docker
+*.tar

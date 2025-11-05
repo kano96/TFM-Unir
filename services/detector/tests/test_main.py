@@ -19,21 +19,18 @@ def test_detect_returns_200_and_valid_json():
 def test_detect_identifies_extreme_values_as_anomalies():
     """Prueba que valores extremos generen una predicción de anomalía."""
     # valores normales
-    normal_response = client.post(
-        "/detect", json={"values": [0.1, 0.2, 0.3, 0.4]})
+    normal_response = client.post("/detect", json={"values": [0.1, 0.2, 0.3, 0.4]})
     normal_score = normal_response.json()["score"]
 
     # valores muy fuera de rango
-    extreme_response = client.post(
-        "/detect", json={"values": [50.0, 60.0, 70.0, 80.0]})
+    extreme_response = client.post("/detect", json={"values": [50.0, 60.0, 70.0, 80.0]})
     extreme_result = extreme_response.json()
 
     assert extreme_response.status_code == 200
     # Esperamos que al menos los valores extremos sean más "anómalos"
     assert extreme_result["is_anomaly"] in [True, False]  # tipo correcto
     is_more_anomalous = (
-        extreme_result["score"] <= normal_score
-        or extreme_result["is_anomaly"] is True
+        extreme_result["score"] <= normal_score or extreme_result["is_anomaly"] is True
     )
     assert is_more_anomalous
 

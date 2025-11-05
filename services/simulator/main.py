@@ -7,13 +7,14 @@ from prometheus_client import Counter, Histogram, generate_latest
 app = FastAPI(title="Simulator Service")
 
 # Configuración de logs
-logging.basicConfig(level=logging.INFO, filename="service.log",
-                    format="%(asctime)s %(message)s")
+logging.basicConfig(
+    level=logging.INFO, filename="service.log", format="%(asctime)s %(message)s"
+)
 
 # Métricas Prometheus
-REQUEST_COUNT = Counter('app_requests_total', 'Total de peticiones')
-ERROR_COUNT = Counter('app_errors_total', 'Errores simulados')
-LATENCY = Histogram('app_request_latency_seconds', 'Latencia de solicitudes')
+REQUEST_COUNT = Counter("app_requests_total", "Total de peticiones")
+ERROR_COUNT = Counter("app_errors_total", "Errores simulados")
+LATENCY = Histogram("app_request_latency_seconds", "Latencia de solicitudes")
 
 
 @app.get("/simulate")

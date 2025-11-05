@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        language_version: python3.10
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: [--max-line-length=100]
+  - repo: local
+    hooks:
+      - id: docker-compose-test
+        name: Run tests in Docker Compose before commit
+        entry: |
+          bash -c '
+            echo "🔄 Rebuilding images before tests...";
+            docker compose build --quiet >/dev/null 2>&1;
+            echo "🧪 Running tests inside Docker Compose...";
+            docker compose up -d detector predictor rca simulator >/dev/null 2>&1;
+            docker compose exec -T detector pytest -q || exit 1;
+            docker compose exec -T predictor pytest -q || exit 1;
+            docker compose exec -T rca pytest -q || exit 1;
+            docker compose exec -T simulator pytest -q || exit 1;
+            echo "✅ All tests passed."
+          '
+        language: system
+        pass_filenames: false

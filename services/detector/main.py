@@ -21,8 +21,7 @@ def detect(data: DetectionInput):
 
     if not values:
         raise HTTPException(
-            status_code=422,
-            detail="Debe proporcionar una lista de valores numéricos."
+            status_code=422, detail="Debe proporcionar una lista de valores numéricos."
         )
 
     if not trained:

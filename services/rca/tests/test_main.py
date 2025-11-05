@@ -15,7 +15,7 @@ def test_rca_returns_possible_causes():
         "edges": [
             {"source": "A", "target": "B"},
             {"source": "B", "target": "C"},
-            {"source": "A", "target": "D"}
+            {"source": "A", "target": "D"},
         ]
     }
 
@@ -35,10 +35,7 @@ def test_rca_with_multiple_roots():
     (nodos sin dependencias entrantes).
     """
     payload = {
-        "edges": [
-            {"source": "A", "target": "B"},
-            {"source": "C", "target": "D"}
-        ]
+        "edges": [{"source": "A", "target": "B"}, {"source": "C", "target": "D"}]
     }
 
     response = client.post("/rca", json=payload)

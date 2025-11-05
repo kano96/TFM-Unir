@@ -7,8 +7,7 @@ client = TestClient(app)
 def test_predict_returns_200_and_valid_value():
     """Verifica que el endpoint responda 200 y
     devuelva una predicción numérica."""
-    response = client.post(
-        "/predict", json={"values": [10.0, 12.5, 13.2, 14.8, 15.0]})
+    response = client.post("/predict", json={"values": [10.0, 12.5, 13.2, 14.8, 15.0]})
     assert response.status_code == 200
     data = response.json()
     assert "next_prediction" in data
