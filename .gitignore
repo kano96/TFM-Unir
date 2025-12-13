@@ -27,3 +27,8 @@ venv/
 
 # Docker
 *.tar
+
+# Terraform
+*.terraform/
+*.terraform.lock.hcl.backup
+*.tfplan
