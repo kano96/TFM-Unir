@@ -32,3 +32,6 @@ venv/
 *.terraform/
 *.terraform.lock.hcl.backup
 *.tfplan
+# Terraform
+.terraform/
+.terraform.lock.hcl
