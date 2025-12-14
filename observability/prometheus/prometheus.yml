@@ -1,7 +1,24 @@
 global:
   scrape_interval: 5s
+  evaluation_interval: 5s
 
 scrape_configs:
-  - job_name: "simulator"
+  # -------------------------
+  # Simuladores (microservicios lógicos)
+  # -------------------------
+  - job_name: "simulators"
+    metrics_path: /metrics
+    scrape_interval: 5s
     static_configs:
-      - targets: ["simulator:8080"]
+      - targets:
+          - simulator-user:8000
+          - simulator-auth:8000
+          - simulator-orders:8000
+
+  # -------------------------
+  # Prometheus self-scrape
+  # -------------------------
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - prometheus:9090

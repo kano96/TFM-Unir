@@ -5,14 +5,20 @@ import time
 from datetime import datetime
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response, BackgroundTasks
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from prometheus_client import (
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+    CONTENT_TYPE_LATEST,
+)
 
 # -----------------------------
 # App & Service Identity
@@ -164,7 +170,6 @@ def simulate_request():
     Genera comportamiento normal y con fallos:
     - latencia extra controlada
     - tasa de error controlada
-    - (opcional) spike CPU o memory leak programados desde /fault/*
     """
     FAULT.expire_if_needed()
 
@@ -206,7 +211,7 @@ def simulate_request():
 
 @app.get("/metrics")
 def metrics():
-    return generate_latest()
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.post("/fault/latency")
@@ -250,16 +255,15 @@ def fault_errors(rate: float = 0.5, duration: int = 60):
 
 
 @app.post("/fault/cpu")
-def fault_cpu(duration: int = 30):
+def fault_cpu(background_tasks: BackgroundTasks, duration: int = 30):
     """
     Simula spike de CPU por duration (s).
-    Nota: esto bloquea el worker mientras corre (válido para sim).
     """
     if duration <= 0 or duration > 300:
         raise HTTPException(status_code=400, detail="Invalid duration (1..300)")
     FAULT.set_fault("cpu", duration)
     log_json("WARN", "fault_start", fault_type="cpu", duration_s=duration)
-    burn_cpu(duration)
+    background_tasks.add_task(burn_cpu, duration)
     FAULT.expire_if_needed()
     return {
         "status": "ok",
@@ -270,10 +274,11 @@ def fault_cpu(duration: int = 30):
 
 
 @app.post("/fault/memory")
-def fault_memory(mb_per_sec: int = 5, duration: int = 30):
+def fault_memory(
+    background_tasks: BackgroundTasks, mb_per_sec: int = 5, duration: int = 30
+):
     """
     Simula memory leak controlado.
-    Recomendación: limitar recursos del contenedor.
     """
     if mb_per_sec <= 0 or duration <= 0 or duration > 300:
         raise HTTPException(status_code=400, detail="Invalid mb_per_sec/duration")
@@ -285,7 +290,7 @@ def fault_memory(mb_per_sec: int = 5, duration: int = 30):
         mb_per_sec=mb_per_sec,
         duration_s=duration,
     )
-    leak_memory(mb_per_sec, duration)
+    background_tasks.add_task(leak_memory, mb_per_sec, duration)
     FAULT.expire_if_needed()
     return {
         "status": "ok",

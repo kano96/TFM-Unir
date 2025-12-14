@@ -3,3 +3,6 @@ httpx
 pre-commit
 flake8
 black
+pandas
+pyarrow
+requests
