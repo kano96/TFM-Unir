@@ -1,10 +1,31 @@
 services:
-  simulator:
+  simulator-user:
     build:
       context: ./services/simulator
-    container_name: simulator
+    environment:
+      SERVICE_NAME: user
     ports:
-      - "8080:8080"
+      - "8101:8000"
+    networks:
+      - aiops-net
+
+  simulator-auth:
+    build:
+      context: ./services/simulator
+    environment:
+      SERVICE_NAME: auth
+    ports:
+      - "8102:8000"
+    networks:
+      - aiops-net
+
+  simulator-orders:
+    build:
+      context: ./services/simulator
+    environment:
+      SERVICE_NAME: orders
+    ports:
+      - "8103:8000"
     networks:
       - aiops-net
 

@@ -18,11 +18,11 @@ repos:
             echo "🔄 Rebuilding images before tests...";
             docker compose build --quiet >/dev/null 2>&1;
             echo "🧪 Running tests inside Docker Compose...";
-            docker compose up -d detector predictor rca simulator >/dev/null 2>&1;
+            docker compose up -d detector predictor rca simulator-auth >/dev/null 2>&1;
             docker compose exec -T detector pytest -q || exit 1;
             docker compose exec -T predictor pytest -q || exit 1;
             docker compose exec -T rca pytest -q || exit 1;
-            docker compose exec -T simulator pytest -q || exit 1;
+            docker compose exec -T simulator-auth pytest -q || exit 1;
             echo "✅ All tests passed."
           '
         language: system
