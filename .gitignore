@@ -35,3 +35,11 @@ venv/
 # Terraform
 .terraform/
 .terraform.lock.hcl
+
+
+# Datos generados
+data/raw
+data/processed/
+data/interim/
+data/labels/*.csv
+

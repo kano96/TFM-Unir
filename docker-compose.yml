@@ -6,6 +6,8 @@ services:
       SERVICE_NAME: user
     ports:
       - "8101:8000"
+    labels:
+      - "aiops_service=user"
     networks:
       - aiops-net
 
@@ -14,6 +16,8 @@ services:
       context: ./services/simulator
     environment:
       SERVICE_NAME: auth
+    labels:
+      - "aiops_service=auth"
     ports:
       - "8102:8000"
     networks:
@@ -24,6 +28,8 @@ services:
       context: ./services/simulator
     environment:
       SERVICE_NAME: orders
+    labels:
+      - "aiops_service=orders"
     ports:
       - "8103:8000"
     networks:
@@ -39,6 +45,17 @@ services:
     networks:
       - aiops-net
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.56
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # UI
+      - "4318:4318" # OTLP HTTP
+    networks:
+      - aiops-net
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -46,6 +63,29 @@ services:
       - "3000:3000"
     networks:
       - aiops-net
+
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./observability/loki/loki-config.yml:/etc/loki/config.yml:ro
+    networks:
+      - aiops-net
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./observability/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - aiops-net
+    depends_on:
+      - loki
 
   detector:
     build:

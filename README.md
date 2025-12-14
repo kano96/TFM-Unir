@@ -80,6 +80,10 @@ docker compose up -d
 - Jaeger: <http://localhost:16686>
 - API (FastAPI): <http://localhost:8000/docs>
 
+```bash
+python scripts/run_experiment.py --duration 300 --rps 2 --services user,auth,orders --weighted
+```
+
 ## Licencia
 
 MIT License — copia y modifica libremente citando la fuente.
