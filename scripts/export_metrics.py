@@ -185,6 +185,9 @@ def main():
     run_id = args.run_id or get_last_run_id(labels_df)
     start, end = compute_time_window(labels_df, run_id, args.pad)
 
+    window_start_iso = start.astimezone(timezone.utc).isoformat(timespec="seconds")
+    window_end_iso = end.astimezone(timezone.utc).isoformat(timespec="seconds")
+
     print(f"[export] run_id={run_id}")
     print(
         f"""[export] window
@@ -211,6 +214,9 @@ def main():
 
         df["metric"] = metric_name
         df["run_id"] = run_id
+        df["window_start"] = window_start_iso
+        df["window_end"] = window_end_iso
+
         all_frames.append(df)
 
     if not all_frames:
@@ -221,7 +227,15 @@ def main():
     out = pd.concat(all_frames, ignore_index=True)
 
     # Normaliza columnas base
-    keep_cols = ["run_id", "ts", "service", "metric", "value"]
+    keep_cols = [
+        "run_id",
+        "window_start",
+        "window_end",
+        "ts",
+        "service",
+        "metric",
+        "value",
+    ]
     extra_cols = [c for c in out.columns if c not in keep_cols]
     out = out[keep_cols + extra_cols]
 
@@ -239,10 +253,13 @@ def main():
         print(f"[ok] saved csv: {csv_path}")
 
     summary = (
-        out.groupby(["service", "metric"])["value"]
+        out.groupby(["run_id", "window_start", "window_end", "service", "metric"])[
+            "value"
+        ]
         .agg(["count", "mean", "min", "max"])
         .reset_index()
     )
+
     summary_path = os.path.join(args.out_dir, f"metrics_{run_id}_summary.csv")
     summary.to_csv(summary_path, index=False)
     print(f"[ok] saved summary: {summary_path}")

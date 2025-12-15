@@ -43,3 +43,4 @@ data/processed/
 data/interim/
 data/labels/*.csv
 
+.conda/
