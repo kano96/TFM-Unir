@@ -1,0 +1,4 @@
+precision,recall,f1,roc_auc,pr_auc,model,details
+0.4305555555555556,0.7045454545454546,0.5344827586206896,0.5155380333951762,0.6333179003186052,baseline_threshold,error_ratio_mean_1min>=0.1
+0.0,0.0,0.0,0.550556586270872,0.6659033159588424,baseline_zscore,error_ratio_mean_1min z>=3.0 win=12
+0.0,0.0,0.0,0.5716604823747681,0.6619193983385424,isolation_forest,score_thr=0.1 contamination=0.05

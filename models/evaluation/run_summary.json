@@ -1,0 +1,9 @@
+{
+  "features_path": "data/processed/features_20251215T013009Z.parquet",
+  "labels_path": "data/labels/fault_windows.csv",
+  "n_windows_total": 459,
+  "n_test_windows": 93,
+  "positive_rate_test": 0.4731182795698925,
+  "mttd_mean_seconds_if": NaN,
+  "mttd_median_seconds_if": NaN
+}
