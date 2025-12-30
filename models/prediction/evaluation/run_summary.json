@@ -1,0 +1,9 @@
+{
+  "features": "data/processed/features_20251215T013009Z.parquet",
+  "labels": "data/labels/fault_windows.csv",
+  "model_path": "models/artifacts/predictor.joblib",
+  "horizon_min": 5,
+  "n_samples": 459,
+  "positive_rate": 0.6405228758169934,
+  "n_features": 110
+}
