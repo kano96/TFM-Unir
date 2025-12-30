@@ -92,6 +92,10 @@ services:
       context: ./services/detector
     ports:
       - "8000:8000"
+    volumes:
+      - ./models/artifacts:/app/models/artifacts:ro
+    environment:
+      - DETECTOR_MODEL_PATH=/app/models/artifacts/detector.joblib
     networks:
       - aiops-net
 
