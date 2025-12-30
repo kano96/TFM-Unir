@@ -18,7 +18,6 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
-# matplotlib (solo si quieres guardar gráficos)
 import matplotlib.pyplot as plt
 
 
@@ -580,6 +579,7 @@ def main():
         ) as f:
             json.dump(feature_cols, f, ensure_ascii=False, indent=2)
 
+    # --- Evaluación en TEST (métricas clásicas) ---
     X_test = test_df[feature_cols].to_numpy()
     y_true = test_df["y_true"].to_numpy()
     y_pred, y_score = if_predict(model, X_test, score_threshold=args.if_score_thr)
@@ -594,25 +594,25 @@ def main():
     )
     results.append(m)
 
-    test_scored = test_df.copy()
-    test_scored["y_pred_if"] = y_pred
-    test_scored["if_score"] = y_score
-
-    if args.save_plots:
-        plot_confusion(
-            y_true,
-            y_pred,
-            os.path.join(args.out_dir, "isolation_forest_cm.png"),
-            "Isolation Forest CM",
-        )
-        plot_roc_pr(y_true, y_score, args.out_dir, "isolation_forest")
-
-    # -----------------------------
-    # MTTD (para Isolation Forest)
-    # -----------------------------
-    mttd_df = compute_mttd(
-        labeled_features=test_scored, labels=labels, y_pred_col="y_pred_if"
+    # --- Predicción en todo el run (para MTTD) ---
+    labeled_scored = labeled.copy()
+    labeled_scored[feature_cols] = (
+        labeled_scored[feature_cols].replace([np.inf, -np.inf], np.nan).fillna(0.0)
     )
+
+    X_all = labeled_scored[feature_cols].to_numpy()
+    y_pred_all, y_score_all = if_predict(
+        model, X_all, score_threshold=args.if_score_thr
+    )
+
+    labeled_scored["y_pred_if"] = y_pred_all.astype(int)
+    labeled_scored["if_score"] = y_score_all
+
+    # --- MTTD ---
+    mttd_df = compute_mttd(
+        labeled_features=labeled_scored, labels=labels, y_pred_col="y_pred_if"
+    )
+
     mttd_path = os.path.join(args.out_dir, "mttd_isolation_forest.csv")
     mttd_df.to_csv(mttd_path, index=False)
 
