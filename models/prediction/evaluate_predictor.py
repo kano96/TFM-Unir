@@ -73,10 +73,17 @@ def build_y_future(
 ) -> pd.DataFrame:
     """
     y_future = 1 si existe un fallo para (run_id,service) que ocurra dentro del
-    intervalo [window_end, window_end + horizon].
+    intervalo FUTURO [window_end, window_end + horizon] Y la ventana actual NO está
+    ya dentro de un fallo.
+
+    - is_current_fault = solapa [window_start, window_end] con [fault_start, fault_end]
+    - is_future_fault  = solapa [window_end, window_end + horizon] con
+    [fault_start, fault_end]
+    - y_future = is_future_fault AND NOT is_current_fault
     """
     horizon = timedelta(minutes=horizon_min)
 
+    # Map faults by (run_id, service)
     faults_map: Dict[Tuple[str, str], List[Tuple[datetime, datetime]]] = {}
     for _, r in labels.iterrows():
         key = (str(r["run_id"]), str(r["service"]))
@@ -85,16 +92,34 @@ def build_y_future(
     y = []
     for _, r in features.iterrows():
         key = (str(r["run_id"]), str(r["service"]))
+
+        w_start = ensure_dt_utc(r["window_start"])
         w_end = ensure_dt_utc(r["window_end"])
+
+        # Ventana actual (para excluir "ya en incidente")
+        current_start = w_start
+        current_end = w_end
+
+        # Ventana futura (horizonte de predicción)
         future_start = w_end
         future_end = w_end + horizon
 
-        hit = 0
+        is_current_fault = 0
+        is_future_fault = 0
+
         for fs, fe in faults_map.get(key, []):
+            if overlaps(current_start, current_end, fs, fe):
+                is_current_fault = 1
             if overlaps(future_start, future_end, fs, fe):
-                hit = 1
+                is_future_fault = 1
+
+            # micro-optimización: si ya sabemos ambas, salimos
+            if is_current_fault and is_future_fault:
                 break
-        y.append(hit)
+
+        # Predicción real: solo si hay fallo en el futuro
+        y_future = 1 if (is_future_fault == 1 and is_current_fault == 0) else 0
+        y.append(y_future)
 
     out = features.copy()
     out["y_future"] = np.array(y, dtype=int)
@@ -172,6 +197,9 @@ def main():
     df = load_features(args.features)
     labels = load_labels(args.labels)
     df = build_y_future(df, labels, args.horizon_min)
+
+    print("[debug] y_future positive_rate =", float(df["y_future"].mean()))
+    print("[debug] y_future counts =", df["y_future"].value_counts().to_dict())
 
     X_cols = select_feature_columns(df)
     X = df[X_cols].replace([np.inf, -np.inf], np.nan).fillna(0.0).to_numpy()

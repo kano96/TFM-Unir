@@ -1,7 +1,8 @@
 import argparse
 import json
 import os
-from datetime import timedelta
+from datetime import datetime, timezone, timedelta
+from typing import Dict, List, Tuple
 
 import joblib
 import pandas as pd
@@ -37,26 +38,74 @@ def load_labels(path: str) -> pd.DataFrame:
     return df
 
 
-def build_future_label(features: pd.DataFrame, labels: pd.DataFrame, horizon_min: int):
-    y = []
+def overlaps(
+    a_start: datetime, a_end: datetime, b_start: datetime, b_end: datetime
+) -> bool:
+    return (a_start <= b_end) and (b_start <= a_end)
+
+
+def build_future_label(
+    features: pd.DataFrame, labels: pd.DataFrame, horizon_min: int
+) -> pd.DataFrame:
+    """
+    y_future = 1 si existe un fallo para (run_id,service) que ocurra dentro del
+    intervalo FUTURO [window_end, window_end + horizon] Y la ventana actual NO está
+    ya dentro de un fallo.
+
+    - is_current_fault = solapa [window_start, window_end] con [fault_start, fault_end]
+    - is_future_fault  = solapa [window_end, window_end +
+    horizon] con [fault_start, fault_end]
+    - y_future = is_future_fault AND NOT is_current_fault
+    """
     horizon = timedelta(minutes=horizon_min)
 
+    # Pre-index faults por (run_id, service) para evitar filtrar el DF en cada fila
+    faults_map: Dict[Tuple[str, str], List[Tuple[datetime, datetime]]] = {}
+    for _, r in labels.iterrows():
+        key = (str(r["run_id"]), str(r["service"]))
+        fs = r["start_dt"]
+        fe = r["end_dt"]
+        # asegurar tz-aware UTC
+        if getattr(fs, "tzinfo", None) is None:
+            fs = fs.replace(tzinfo=timezone.utc)
+        if getattr(fe, "tzinfo", None) is None:
+            fe = fe.replace(tzinfo=timezone.utc)
+        faults_map.setdefault(key, []).append((fs, fe))
+
+    y = []
     for _, r in features.iterrows():
-        we = r["window_end"]
-        run_id = str(r["run_id"])
-        service = str(r["service"])
+        key = (str(r["run_id"]), str(r["service"]))
 
-        future_faults = labels[
-            (labels["run_id"].astype(str) == run_id)
-            & (labels["service"].astype(str) == service)
-            & (labels["start_dt"] >= we)
-            & (labels["start_dt"] <= we + horizon)
-        ]
+        ws = r["window_start"].to_pydatetime()
+        we = r["window_end"].to_pydatetime()
 
-        y.append(1 if not future_faults.empty else 0)
+        if getattr(ws, "tzinfo", None) is None:
+            ws = ws.replace(tzinfo=timezone.utc)
+        if getattr(we, "tzinfo", None) is None:
+            we = we.replace(tzinfo=timezone.utc)
 
-    features["y_future"] = y
-    return features
+        # ventana actual
+        current_start, current_end = ws, we
+        # ventana futura (horizonte)
+        future_start, future_end = we, we + horizon
+
+        is_current_fault = 0
+        is_future_fault = 0
+
+        for fs, fe in faults_map.get(key, []):
+            if overlaps(current_start, current_end, fs, fe):
+                is_current_fault = 1
+            if overlaps(future_start, future_end, fs, fe):
+                is_future_fault = 1
+            if is_current_fault and is_future_fault:
+                break
+
+        y_future = 1 if (is_future_fault == 1 and is_current_fault == 0) else 0
+        y.append(y_future)
+
+    out = features.copy()
+    out["y_future"] = y
+    return out
 
 
 def select_feature_columns(df: pd.DataFrame):
@@ -114,7 +163,13 @@ def main():
     y_pred = model.predict(X_test)
     print(classification_report(y_test, y_pred, zero_division=0))
 
-    joblib.dump(model, os.path.join(args.out_dir, "predictor.joblib"))
+    artifact = {
+        "model": model,
+        "threshold": 0.05,
+        "feature_columns": feature_cols,
+    }
+
+    joblib.dump(artifact, os.path.join(args.out_dir, "predictor.joblib"))
     with open(os.path.join(args.out_dir, "predictor_features.json"), "w") as f:
         json.dump(feature_cols, f, indent=2)
 

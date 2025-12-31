@@ -104,6 +104,11 @@ services:
       context: ./services/predictor
     ports:
       - "8001:8001"
+    volumes:
+      - ./models/artifacts:/app/models/artifacts:ro
+    environment:
+      - PREDICTOR_MODEL_PATH=/app/models/artifacts/predictor.joblib
+      - PREDICTOR_THRESHOLD=0.45
     networks:
       - aiops-net
 
