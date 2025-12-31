@@ -1,0 +1,28 @@
+{
+  "incident_id": "20251215T013009Z_inc0",
+  "run_id": "20251215T013009Z",
+  "n_alerts": 105,
+  "candidates": [
+    {
+      "service": "auth",
+      "score": 1.2033679657206187,
+      "magnitude": 0.20336796572252128,
+      "centrality": 0.9999999999974959,
+      "earliness": 0.9999999999989999
+    },
+    {
+      "service": "user",
+      "score": 1.1169769635093822,
+      "magnitude": 0.12185938161316874,
+      "centrality": 0.9918626364943557,
+      "earliness": 0.9999999999989999
+    },
+    {
+      "service": "orders",
+      "score": 0.8131154383588146,
+      "magnitude": 0.10573580002927829,
+      "centrality": 0.5122993972165606,
+      "earliness": 0.9999999999989999
+    }
+  ]
+}

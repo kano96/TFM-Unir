@@ -117,6 +117,10 @@ services:
       context: ./services/rca
     ports:
       - "8002:8002"
+    volumes:
+      - ./models/rca:/app/models/rca:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./models/rca/out:/app/models/rca/out
     networks:
       - aiops-net
 

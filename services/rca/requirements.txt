@@ -1,5 +1,11 @@
 fastapi
 uvicorn
-networkx
+pydantic
 pytest
 httpx
+pandas
+pyarrow
+numpy
+networkx
+scipy
+joblib
