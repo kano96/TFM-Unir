@@ -1,0 +1,114 @@
+apiVersion: 1
+
+groups:
+  # -----------------------------
+  # Predictor (model-based alerts)
+  # -----------------------------
+  - orgId: 1
+    name: predictor-alerts
+    folder: AIOps
+    interval: 10s
+    rules:
+      - uid: aiops-predictor-incident-flag
+        title: AIOps - Predictor Incident Flag
+        condition: A
+        for: 20s
+        noDataState: NoData
+        execErrState: Error
+        labels:
+          severity: critical
+          component: predictor
+        annotations:
+          summary: Predicted incident detected by AIOps model
+          description: Service {{ $labels.service }} predicted an incident (flag=1)
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              refId: A
+              expr: max_over_time(aiops_incident_flag[1m])
+              intervalMs: 10000
+              maxDataPoints: 43200
+
+      - uid: aiops-predictor-high-prob
+        title: AIOps - Predictor High Probability
+        condition: A
+        for: 30s
+        noDataState: NoData
+        execErrState: Error
+        labels:
+          severity: warning
+          component: predictor
+        annotations:
+          summary: High incident probability detected
+          description: Service {{ $labels.service }} has high incident probability (p={{ $values.A }})
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              refId: A
+              expr: max_over_time(aiops_incident_probability[1m]) > 0.75
+              intervalMs: 10000
+              maxDataPoints: 43200
+
+  # -----------------------------
+  # Simulator (threshold-based alerts)
+  # -----------------------------
+  - orgId: 1
+    name: simulator-alerts
+    folder: AIOps
+    interval: 10s
+    rules:
+      - uid: aiops-high-error-ratio
+        title: AIOps - High Error Ratio
+        condition: A
+        for: 30s
+        noDataState: NoData
+        execErrState: Error
+        labels:
+          severity: warning
+          component: simulator
+        annotations:
+          summary: High error ratio detected
+          description: Service {{ $labels.service }} error ratio is above threshold (ratio={{ $values.A }})
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              refId: A
+              expr: avg_over_time(error_ratio[1m]) > 0.05
+              intervalMs: 10000
+              maxDataPoints: 43200
+
+      - uid: aiops-high-p95-latency
+        title: AIOps - High P95 Latency
+        condition: A
+        for: 30s
+        noDataState: NoData
+        execErrState: Error
+        labels:
+          severity: warning
+          component: simulator
+        annotations:
+          summary: High p95 latency detected
+          description: Service {{ $labels.service }} p95 latency is above threshold (p95={{ $values.A }})
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              refId: A
+              expr: avg_over_time(p95_latency[1m]) > 400
+              intervalMs: 10000
+              maxDataPoints: 43200

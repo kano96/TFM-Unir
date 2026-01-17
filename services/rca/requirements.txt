@@ -9,3 +9,4 @@ numpy
 networkx
 scipy
 joblib
+prometheus-client

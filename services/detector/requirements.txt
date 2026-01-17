@@ -6,3 +6,4 @@ pandas
 joblib
 pytest
 httpx
+prometheus-client

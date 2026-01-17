@@ -1,0 +1,82 @@
+{
+  "uid": "aiops-rca",
+  "title": "AIOps — RCA Suggestions",
+  "tags": [
+    "aiops",
+    "rca",
+    "phase7"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+  "list": [
+    {
+      "name": "incident_id",
+      "type": "query",
+      "label": "Incident ID",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "refresh": 2,
+      "query": {
+        "query": "label_values(aiops_rca_candidate_score, incident_id)",
+        "refId": "PromVar"
+      },
+      "current": {
+        "selected": true,
+        "text": "20251215T013009Z_inc0",
+        "value": "20251215T013009Z_inc0"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "RCA Scores",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "aiops_rca_candidate_score{incident_id=\"$incident_id\"}",
+          "legendFormat": "{{service}} (rank {{rank}})"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "RCA Service Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 24,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{container=~\".*rca.*\"}"
+        }
+      ]
+    }
+  ]
+}

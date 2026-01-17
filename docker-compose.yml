@@ -61,6 +61,17 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=mailhog:1025
+      - GF_SMTP_FROM_ADDRESS=aiops@grafana.local
+      - GF_SMTP_FROM_NAME=AIOps Grafana
+      - GF_PLUGINS_PREINSTALL_DISABLED=true
     networks:
       - aiops-net
 
@@ -121,6 +132,15 @@ services:
       - ./models/rca:/app/models/rca:ro
       - ./data/processed:/app/data/processed:ro
       - ./models/rca/out:/app/models/rca/out
+    networks:
+      - aiops-net
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP
     networks:
       - aiops-net
 

@@ -178,9 +178,8 @@ def main():
     start, end = compute_time_window(labels_df, run_id, args.pad)
 
     services = [s.strip() for s in args.services.split(",") if s.strip()]
-
-    container_re = "|".join([f".*simulator-{s}.*" for s in services])
-    query = f'{{container=~"{container_re}"}}'
+    svc_re = "|".join(services)
+    query = f'{{service=~"{svc_re}"}}'
 
     print(f"[export] run_id={run_id}")
     print(

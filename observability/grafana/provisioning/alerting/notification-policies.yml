@@ -1,0 +1,13 @@
+apiVersion: 1
+
+policies:
+  - orgId: 1
+    receiver: AIOps-Mail
+    group_by: ["alertname", "service"]
+    routes:
+      - receiver: AIOps-Mail
+        object_matchers:
+          - ["component", "=", "predictor"]
+      - receiver: AIOps-Mail
+        object_matchers:
+          - ["component", "=", "simulator"]
