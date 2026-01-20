@@ -1,11 +1,14 @@
+data "aws_caller_identity" "current" {}
+
 locals {
   prefix = "${var.project_name}-${var.owner}"
+  suffix = data.aws_caller_identity.current.account_id
 }
 
-# S3 bucket para datasets/modelos
 resource "aws_s3_bucket" "data" {
-  bucket = "${local.prefix}-data"
+  bucket = "${local.prefix}-${local.suffix}-data"
 }
+
 
 resource "aws_s3_bucket_versioning" "data_versioning" {
   bucket = aws_s3_bucket.data.id
