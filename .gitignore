@@ -38,6 +38,7 @@ venv/
 
 
 # Datos generados
+docs/
 data/raw
 data/processed/
 data/interim/
