@@ -8,7 +8,9 @@ on:
     workflow_dispatch: {} # para correr apply manual
 
 env:
-    AWS_REGION: ${{ secrets.AWS_REGION }}
+    AWS_REGION: us-east-1
+    PROJECT_NAME: aiops-tfm
+    OWNER: kevin
     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
@@ -105,8 +107,8 @@ jobs:
               env:
                   ACCOUNT_ID: ${{ secrets.ECR_ACCOUNT_ID }}
                   REGION: ${{ env.AWS_REGION }}
-                  PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
-                  OWNER: ${{ secrets.OWNER }}
+                  PROJECT_NAME: ${{ env.PROJECT_NAME }}
+                  OWNER: ${{ env.OWNER }}
               run: |
                   set -e
                   PREFIX="$PROJECT_NAME-$OWNER"
