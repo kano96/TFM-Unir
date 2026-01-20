@@ -58,14 +58,15 @@ def attach_embeddings(
     Une por (run_id, service, ts ~ window_end) usando merge_asof por tiempo.
     """
     tfidf_cols = select_tfidf_cols(features)
+    if alerts.empty:
+        a = alerts.copy()
+        a["has_embed"] = False
+        return a, []
     if not tfidf_cols:
         # sin embeddings
         a = alerts.copy()
         a["has_embed"] = False
         return a, []
-
-    feats = features[["window_end"] + tfidf_cols].copy()
-    feats = feats.sort_values("window_end")
 
     a = alerts.copy()
     a = a.sort_values("ts")
@@ -146,6 +147,23 @@ def main():
     args = p.parse_args()
 
     ensure_dir(args.out_dir)
+
+    alerts = load_alerts(args.alerts)
+    if alerts.empty:
+        out_path = os.path.join(
+            args.out_dir, os.path.basename(args.alerts).replace("alerts_", "incidents_")
+        )
+        # escribe vacío con columnas esperadas
+        empty = alerts.copy()
+        empty["cluster_id"] = pd.Series(dtype=int)
+        empty["incident_id"] = pd.Series(dtype=str)
+        if out_path.endswith(".csv"):
+            empty.to_csv(out_path, index=False)
+        else:
+            empty.to_parquet(out_path, index=False)
+
+        print(f"[warn] alerts vacío (rows=0). saved empty incidents: {out_path}")
+        return
 
     alerts = load_alerts(args.alerts)
     feats = load_features(args.features)

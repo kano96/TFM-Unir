@@ -147,9 +147,11 @@ def main():
 
         for p in [build_alerts_py, group_alerts_py, build_graph_py, rca_py]:
             if not p.exists():
-                raise FileNotFoundError("No existe")
+                raise FileNotFoundError(f"No existe: {p}")
 
-        alerts_out = "data/processed"
+        alerts_out = f"data/processed/alerts_{run_id}.parquet"
+        incidents_out = f"data/processed/incidents_{run_id}.parquet"
+        graph_out = f"data/processed/service_graph_{run_id}.json"
 
         # build alerts
         run(
@@ -158,22 +160,18 @@ def main():
                 str(build_alerts_py),
                 "--features",
                 f"data/processed/features_{run_id}.parquet",
-                "--out-dir",
+                "--out",
                 alerts_out,
-                "--run-id",
-                run_id,
-                "--use-metric-rule",
-                "--use-log-rule",
             ]
         )
 
-        # 2) Group alerts -> incidents
+        # group alerts -> incidents
         run(
             [
                 sys.executable,
                 str(group_alerts_py),
                 "--alerts",
-                f"data/processed/alerts_{run_id}.parquet",
+                alerts_out,
                 "--features",
                 f"data/processed/features_{run_id}.parquet",
                 "--out-dir",
@@ -187,30 +185,27 @@ def main():
             ]
         )
 
-        # 3) Build service graph (desde incidents)
+        # build service graph
         run(
             [
                 sys.executable,
                 str(build_graph_py),
-                "--incidents",
-                f"data/processed/incidents_{run_id}.parquet",
-                "--out-dir",
-                "data/processed",
-                "--window-seconds",
-                "120",
+                "--out",
+                graph_out,
             ]
         )
 
         # rca (elige el primer incidente por defecto)
+        # si tu archivo incidents tiene ids tipo <run_id>_inc0, esto funcionará:
         incident_id = f"{run_id}_inc0"
         run(
             [
                 sys.executable,
                 str(rca_py),
                 "--incidents",
-                f"data/processed/incidents_{run_id}.parquet",
+                incidents_out,
                 "--graph",
-                f"data/processed/service_graph_{run_id}.json",
+                graph_out,
                 "--incident-id",
                 incident_id,
                 "--out-dir",

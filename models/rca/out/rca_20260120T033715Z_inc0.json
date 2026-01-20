@@ -1,0 +1,28 @@
+{
+  "incident_id": "20260120T033715Z_inc0",
+  "run_id": "20260120T033715Z",
+  "n_alerts": 63,
+  "candidates": [
+    {
+      "service": "auth",
+      "score": 0.8433306944614354,
+      "magnitude": 0.23955710955710957,
+      "centrality": 0.9999999999977822,
+      "earliness": 0.009433962264141508
+    },
+    {
+      "service": "user",
+      "score": 0.7936245772730313,
+      "magnitude": 0.18338661839041973,
+      "centrality": 0.35039659813835256,
+      "earliness": 0.9999999999989999
+    },
+    {
+      "service": "orders",
+      "score": 0.6404691284456048,
+      "magnitude": 0.11714513556618819,
+      "centrality": 0.8674785224113256,
+      "earliness": 0.007092198581553191
+    }
+  ]
+}

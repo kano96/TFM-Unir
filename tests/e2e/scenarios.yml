@@ -1,0 +1,29 @@
+run_id: auto
+services:
+  user:
+    base_url: "http://localhost:8101"
+  auth:
+    base_url: "http://localhost:8102"
+  orders:
+    base_url: "http://localhost:8103"
+
+scenarios:
+  - name: "latency_orders_60s"
+    service: "orders"
+    fault: "latency"
+    duration_s: 60
+    params:
+      ms: 500
+
+  - name: "errors_auth_45s"
+    service: "auth"
+    fault: "errors"
+    duration_s: 45
+    params:
+      rate: 0.6
+
+  - name: "cpu_user_20s"
+    service: "user"
+    fault: "cpu"
+    duration_s: 20
+    params: {}
